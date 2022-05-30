@@ -1,5 +1,9 @@
 import { SquareValue } from "./SquareValue.enum";
-import { WinnerInformation } from "./WinnerInformation.interface";
+
+interface WinnerInformation {
+	winner: SquareValue;
+	winningLineIndexes: number[];
+};
 
 const defaultSquareMatrix: SquareValue[] = [
     SquareValue.None, SquareValue.None, SquareValue.None,
