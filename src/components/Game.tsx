@@ -6,16 +6,14 @@ import { SquareValue } from "../types/SquareValue.enum";
 import { Board } from "./Board";
 
 export const Game = (): JSX.Element | null => {
-    const [currentMoveNumber, setCurrentMoveNumber] = useState<number>(0);
-
-    const [xIsNext, setXIsNext] = useState<boolean>(true);
+    const [currentMove, setCurrentMove] = useState<number>(0);
 
     const [boardHistory, setBoardHistory] = useState<BoardInformation[]>([
         new BoardInformation()
     ]);
 
     const handleClick = (index: number) => {
-        const newBoardHistory = boardHistory.slice(0, currentMoveNumber + 1);
+        const newBoardHistory = boardHistory.slice(0, currentMove + 1);
         const newBoard = newBoardHistory[newBoardHistory.length - 1];
 
         if (!newBoard.isClickableAtIndex(index)) {
@@ -23,19 +21,21 @@ export const Game = (): JSX.Element | null => {
         }
 
         const updatedSquares = [...newBoard.squares];
-        updatedSquares[index] = xIsNext ? SquareValue.X : SquareValue.O;
+        updatedSquares[index] = nextSquareValue();
 
         setBoardHistory([...newBoardHistory, new BoardInformation(updatedSquares)]);
-        setCurrentMoveNumber(newBoardHistory.length);
-        setXIsNext(!xIsNext);
+        setCurrentMove(newBoardHistory.length);
     };
 
     const jumpTo = (moveNumber: number) => {
-        setCurrentMoveNumber(moveNumber);
-        setXIsNext(moveNumber % 2 === 0);
+        setCurrentMove(moveNumber);
     };
 
-    const currentBoard = boardHistory[currentMoveNumber];
+    const nextSquareValue = (): SquareValue.X | SquareValue.O => {
+        return currentMove % 2 === 0 ? SquareValue.X : SquareValue.O;
+    }
+
+    const currentBoard = boardHistory[currentMove];
 
     const moves = boardHistory.map((board, moveNumber) => {
         const label = moveNumber === 0
@@ -62,7 +62,7 @@ export const Game = (): JSX.Element | null => {
     else {
         status = currentBoard.isFullyMarked
             ? `Draw`
-            : `Next player: ${xIsNext ? 'X' : 'O'}`;
+            : `Next player: ${convertSquareValueToLabel(nextSquareValue())}`;
     }
 
     return (
