@@ -3,6 +3,7 @@ import { useState } from "react";
 import { convertSquareValueToLabel } from "../shared/convertSquareValueToLabel.function";
 import { BoardInformation } from "../types/BoardInformation";
 import { MoveInformation } from "../types/MoveInformation";
+import { SortOrderType } from "../types/SortOrderType.enum";
 import { SquareValue } from "../types/SquareValue.enum";
 import { Board } from "./Board";
 
@@ -14,6 +15,8 @@ export const Game = (): JSX.Element | null => {
     const [boardHistory, setBoardHistory] = useState<BoardInformation[]>([
         new BoardInformation()
     ]);
+
+    const [moveHistorySortOrder, setMoveHistorySortOrder] = useState<SortOrderType>(SortOrderType.Ascending);
 
     const handleClick = (index: number) => {
         const newBoardHistory = boardHistory.slice(0, currentMoveNumber + 1);
@@ -36,46 +39,69 @@ export const Game = (): JSX.Element | null => {
         setCurrentMoveNumber(moveNumber);
     };
 
+    const switchMoveHistorySortOrder = (): void => {
+        if (moveHistorySortOrder === SortOrderType.Ascending) {
+            setMoveHistorySortOrder(SortOrderType.Descending);
+        }
+        else {
+            setMoveHistorySortOrder(SortOrderType.Ascending);
+        }
+    };
+
     const nextSquareValue = (): SquareValue.X | SquareValue.O => {
         return currentMoveNumber % 2 === 0 ? SquareValue.X : SquareValue.O;
     };
 
-    const currentBoard: BoardInformation = boardHistory[currentMoveNumber];
+    const getMoveListItems = (): JSX.Element[] => {
+        const items: JSX.Element[] = boardHistory.map((board, moveNumber) => {
+            let label: string;
+            const buttonIsDisabled = currentMoveNumber === moveNumber;
 
-    const moveComponents: JSX.Element[] = boardHistory.map((board, moveNumber) => {
-        let label: string;
-        const buttonIsDisabled = currentMoveNumber === moveNumber;
+            if (moveNumber === 0) {
+                label = 'Go to game start';
+            } else {
+                const move = moveHistory[moveNumber - 1];
+                label = `Go to move #${moveNumber} (${move.playerName} at ${move.row}, ${move.column})`;
+            }
 
-        if (moveNumber === 0) {
-            label = 'Go to game start';
-        } else {
-            const move = moveHistory[moveNumber - 1];
-            label = `Go to move #${moveNumber} (${move.playerName} at ${move.row}, ${move.column})`;
+            return (
+                <li key={moveNumber}>
+                    <button
+                        className="move"
+                        disabled={buttonIsDisabled}
+                        onClick={() => { jumpToMove(moveNumber); }}
+                    >
+                        {label}
+                    </button>
+                </li>
+            );
+        });
+
+        if (moveHistorySortOrder === SortOrderType.Ascending) {
+            return items;
         }
+        else {
+            return items.reverse();
+        }
+    };
 
-        return (
-            <li key={moveNumber}>
-                <button
-                    className="move"
-                    disabled={buttonIsDisabled}
-                    onClick={() => { jumpToMove(moveNumber); }}
-                >
-                    {label}
-                </button>
-            </li>
-        );
-    });
+    const currentBoard: BoardInformation = boardHistory[currentMoveNumber];
+    const moveListItems: JSX.Element[] = getMoveListItems();
 
-    let status: string;
+    let moveHistorySortOrderLabel = moveHistorySortOrder === SortOrderType.Ascending
+        ? 'Newest last 🠟'
+        : 'Newest first 🠝';
+
+    let gameStatus: JSX.Element;
 
     if (currentBoard.hasWinner) {
         const winnerLabel = convertSquareValueToLabel(currentBoard.winner);
-        status = `Winner: ${winnerLabel}`;
+        gameStatus = <>Winner: <strong>{winnerLabel}</strong></>;
     }
     else {
-        status = currentBoard.isFullyMarked
-            ? `Draw`
-            : `Next player: ${convertSquareValueToLabel(nextSquareValue())}`;
+        gameStatus = currentBoard.isFullyMarked
+            ? <>Draw</>
+            : <>Next player: <strong>{convertSquareValueToLabel(nextSquareValue())}</strong></>;
     }
 
     return (
@@ -87,8 +113,16 @@ export const Game = (): JSX.Element | null => {
                 />
             </div>
             <div className="game-info">
-                <div>{status}</div>
-                <ul className="move-list">{moveComponents}</ul>
+                <header className="game-info-header">
+                    <div>{gameStatus}</div>
+                    <button
+                        className="move-list-sort-button"
+                        onClick={() => { switchMoveHistorySortOrder(); }}
+                    >
+                        {moveHistorySortOrderLabel}
+                    </button>
+                </header>
+                <ul className="move-list">{moveListItems}</ul>
             </div>
         </div>
     );

@@ -54,6 +54,12 @@ ul {
   margin-left: 20px;
 }
 
+.game-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .move-list {
   display: flex;
   flex-flow: column nowrap;
@@ -62,10 +68,21 @@ ul {
   list-style-type: none;
 }
 
+.move-list-sort-button {
+  width: 7rem;
+  padding: 0.125rem;
+  border: 1px solid #444;
+  border-block-end-width: 2px;
+  border-radius: 4px;
+  font: 14px "Century Gothic", Futura, sans-serif;
+  font-size: 12px;
+}
+
 .move {
-  width: 12rem;
+  width: 15rem;
   padding: 0.375rem 0.75rem;
   border: 1px solid #444;
+  border-block-end-width: 2px;
   border-radius: 4px;
   font: 14px "Century Gothic", Futura, sans-serif;
   font-size: 12px;
@@ -74,4 +91,5 @@ ul {
 .move:disabled {
   font-weight: bold;
   border: 1px solid #888;
+  border-block-end-width: 2px;
 }
