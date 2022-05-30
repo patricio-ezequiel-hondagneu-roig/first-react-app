@@ -1,17 +1,17 @@
-import { SquareValue } from "../types/SquareValue.enum";
+import React from "react";
+import { BoardInformation } from "../types/BoardInformation";
 import { Square } from "./Square";
 
 interface BoardProps {
-    squares: SquareValue[];
-    highlightedSquareIndexes: number[];
+    boardInformation: BoardInformation;
     onClick: (index: number) => void;
 }
 
-export const Board = (props: BoardProps): JSX.Element | null => {
+const UnmemoizedBoard = (props: BoardProps): JSX.Element | null => {
     const renderSquare = (index: number): JSX.Element => {
         return <Square
-            value={props.squares[index]}
-            isHighlighted={props.highlightedSquareIndexes.includes(index)}
+            value={props.boardInformation.squares[index]}
+            isHighlighted={props.boardInformation.valueAtIndexIsInWinningLine(index)}
             onClick={() => { props.onClick(index); }}
         />;
     };
@@ -36,3 +36,5 @@ export const Board = (props: BoardProps): JSX.Element | null => {
         </div>
     );
 };
+
+export const Board = React.memo(UnmemoizedBoard);

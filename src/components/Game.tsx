@@ -27,35 +27,33 @@ export const Game = (): JSX.Element | null => {
         setCurrentMove(newBoardHistory.length);
     };
 
-    const jumpTo = (moveNumber: number) => {
+    const jumpToMove = (moveNumber: number): void => {
         setCurrentMove(moveNumber);
     };
 
     const nextSquareValue = (): SquareValue.X | SquareValue.O => {
         return currentMove % 2 === 0 ? SquareValue.X : SquareValue.O;
-    }
+    };
 
-    const currentBoard = boardHistory[currentMove];
+    const currentBoard: BoardInformation = boardHistory[currentMove];
 
-    const moves = boardHistory.map((board, moveNumber) => {
+    const moves: JSX.Element[] = boardHistory.map((board, moveNumber) => {
         const label = moveNumber === 0
             ? `Go to game start`
             : `Go to move #${moveNumber}`;
 
         return (
             <li key={moveNumber}>
-                <button onClick={() => { jumpTo(moveNumber); }}>
+                <button onClick={() => { jumpToMove(moveNumber); }}>
                     {label}
                 </button>
             </li>
         );
     });
 
-    let highlightedSquareIndexes: number[] = [];
     let status: string;
 
     if (currentBoard.hasWinner) {
-        highlightedSquareIndexes = currentBoard.winningLineIndexes;
         const winnerLabel = convertSquareValueToLabel(currentBoard.winner);
         status = `Winner: ${winnerLabel}`;
     }
@@ -69,8 +67,7 @@ export const Game = (): JSX.Element | null => {
         <div className="game">
             <div className="game-board">
                 <Board
-                    squares={currentBoard.squares}
-                    highlightedSquareIndexes={highlightedSquareIndexes}
+                    boardInformation={currentBoard}
                     onClick={(index) => { handleClick(index); }}
                 />
             </div>

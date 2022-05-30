@@ -74,6 +74,10 @@ export class BoardInformation {
         return !this.hasWinner && !this.isMarkedAtIndex(index);
     }
 
+    valueAtIndexIsInWinningLine(index: number): boolean {
+        return this.winningLineIndexes.includes(index);
+    }
+
     private updateWinnerInformation() {
         const winnerInformation = this.calculateWinnerInformation(this._squares);
         this._winner = winnerInformation.winner;
