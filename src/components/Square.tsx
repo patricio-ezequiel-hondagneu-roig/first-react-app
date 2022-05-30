@@ -1,3 +1,5 @@
+import React from "react";
+
 import { convertSquareValueToLabel } from "../shared/convertSquareValueToLabel.function";
 import { SquareValue } from "../types/SquareValue.enum";
 
@@ -7,7 +9,7 @@ interface SquareProps {
 	onClick: () => void;
 }
 
-export const Square = (props: SquareProps): JSX.Element | null => {
+export const UnmemoizedSquare = (props: SquareProps): JSX.Element | null => {
 	const buttonCssClass = props.isHighlighted
 		? "square highlighted"
 		: "square";
@@ -23,3 +25,5 @@ export const Square = (props: SquareProps): JSX.Element | null => {
 		</button>
 	);
 };
+
+export const Square = React.memo(UnmemoizedSquare)
