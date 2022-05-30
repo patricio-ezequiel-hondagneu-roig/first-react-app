@@ -1,44 +1,31 @@
 import { useState } from "react";
 
-import { calculateWinnerInformation } from "../shared/calculateWinnerInformation.function";
 import { convertSquareValueToLabel } from "../shared/convertSquareValueToLabel.function";
+import { BoardInformation } from "../types/BoardInformation";
 import { SquareValue } from "../types/SquareValue.enum";
 import { Board } from "./Board";
-
-interface BoardState {
-    squares: SquareValue[];
-};
 
 export const Game = (): JSX.Element | null => {
     const [currentMoveNumber, setCurrentMoveNumber] = useState<number>(0);
 
     const [xIsNext, setXIsNext] = useState<boolean>(true);
 
-    const [boardHistory, setBoardHistory] = useState<BoardState[]>([
-        {
-            squares: [
-                SquareValue.None, SquareValue.None, SquareValue.None,
-                SquareValue.None, SquareValue.None, SquareValue.None,
-                SquareValue.None, SquareValue.None, SquareValue.None,
-            ]
-        }
+    const [boardHistory, setBoardHistory] = useState<BoardInformation[]>([
+        new BoardInformation()
     ]);
 
     const handleClick = (index: number) => {
         const newBoardHistory = boardHistory.slice(0, currentMoveNumber + 1);
         const newBoard = newBoardHistory[newBoardHistory.length - 1];
 
-        if (
-            calculateWinnerInformation(newBoard.squares).winner !== SquareValue.None
-            || newBoard.squares[index] !== SquareValue.None
-        ) {
+        if (!newBoard.isClickableAtIndex(index)) {
             return;
         }
 
         const updatedSquares = [...newBoard.squares];
         updatedSquares[index] = xIsNext ? SquareValue.X : SquareValue.O;
 
-        setBoardHistory([...newBoardHistory, { squares: updatedSquares }]);
+        setBoardHistory([...newBoardHistory, new BoardInformation(updatedSquares)]);
         setCurrentMoveNumber(newBoardHistory.length);
         setXIsNext(!xIsNext);
     };
@@ -49,7 +36,6 @@ export const Game = (): JSX.Element | null => {
     };
 
     const currentBoard = boardHistory[currentMoveNumber];
-    const winnerInformation = calculateWinnerInformation(currentBoard.squares);
 
     const moves = boardHistory.map((board, moveNumber) => {
         const label = moveNumber === 0
@@ -68,18 +54,15 @@ export const Game = (): JSX.Element | null => {
     let highlightedSquareIndexes: number[] = [];
     let status: string;
 
-    if (winnerInformation.winner !== SquareValue.None) {
-        highlightedSquareIndexes = [
-            ...highlightedSquareIndexes,
-            ...winnerInformation.winningLineIndexes
-        ];
-        const winnerLabel = convertSquareValueToLabel(winnerInformation.winner);
+    if (currentBoard.hasWinner) {
+        highlightedSquareIndexes = currentBoard.winningLineIndexes;
+        const winnerLabel = convertSquareValueToLabel(currentBoard.winner);
         status = `Winner: ${winnerLabel}`;
     }
     else {
-        status = currentBoard.squares.includes(SquareValue.None)
-            ? `Next player: ${xIsNext ? 'X' : 'O'}`
-            : `Draw`;
+        status = currentBoard.isFullyMarked
+            ? `Draw`
+            : `Next player: ${xIsNext ? 'X' : 'O'}`;
     }
 
     return (
