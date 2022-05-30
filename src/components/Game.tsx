@@ -7,7 +7,7 @@ import { SquareValue } from "../types/SquareValue.enum";
 import { Board } from "./Board";
 
 export const Game = (): JSX.Element | null => {
-    const [currentMoveIndex, setCurrentMoveIndex] = useState<number>(0);
+    const [currentMoveNumber, setCurrentMoveNumber] = useState<number>(0);
 
     const [moveHistory, setMoveHistory] = useState<MoveInformation[]>([]);
 
@@ -16,8 +16,8 @@ export const Game = (): JSX.Element | null => {
     ]);
 
     const handleClick = (index: number) => {
-        const newBoardHistory = boardHistory.slice(0, currentMoveIndex + 1);
-        const newMoveHistory = moveHistory.slice(0, currentMoveIndex);
+        const newBoardHistory = boardHistory.slice(0, currentMoveNumber + 1);
+        const newMoveHistory = moveHistory.slice(0, currentMoveNumber);
         const newBoard = newBoardHistory[newBoardHistory.length - 1];
 
         if (!newBoard.isClickableAtIndex(index)) {
@@ -29,21 +29,22 @@ export const Game = (): JSX.Element | null => {
 
         setBoardHistory([...newBoardHistory, new BoardInformation(updatedSquares)]);
         setMoveHistory([...newMoveHistory, new MoveInformation(nextSquareValue(), index)]);
-        setCurrentMoveIndex(newBoardHistory.length);
+        setCurrentMoveNumber(newBoardHistory.length);
     };
 
     const jumpToMove = (moveNumber: number): void => {
-        setCurrentMoveIndex(moveNumber);
+        setCurrentMoveNumber(moveNumber);
     };
 
     const nextSquareValue = (): SquareValue.X | SquareValue.O => {
-        return currentMoveIndex % 2 === 0 ? SquareValue.X : SquareValue.O;
+        return currentMoveNumber % 2 === 0 ? SquareValue.X : SquareValue.O;
     };
 
-    const currentBoard: BoardInformation = boardHistory[currentMoveIndex];
+    const currentBoard: BoardInformation = boardHistory[currentMoveNumber];
 
     const moveComponents: JSX.Element[] = boardHistory.map((board, moveNumber) => {
         let label: string;
+        const buttonIsDisabled = currentMoveNumber === moveNumber;
 
         if (moveNumber === 0) {
             label = 'Go to game start';
@@ -54,7 +55,11 @@ export const Game = (): JSX.Element | null => {
 
         return (
             <li key={moveNumber}>
-                <button onClick={() => { jumpToMove(moveNumber); }}>
+                <button
+                    className="move"
+                    disabled={buttonIsDisabled}
+                    onClick={() => { jumpToMove(moveNumber); }}
+                >
                     {label}
                 </button>
             </li>
@@ -83,7 +88,7 @@ export const Game = (): JSX.Element | null => {
             </div>
             <div className="game-info">
                 <div>{status}</div>
-                <ol>{moveComponents}</ol>
+                <ul className="move-list">{moveComponents}</ul>
             </div>
         </div>
     );
